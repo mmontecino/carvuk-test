@@ -17,7 +17,7 @@ module Sii
       raise RequestFailed, "SII responded #{response.code}" unless response.is_a?(Net::HTTPSuccess)
     end
 
-    # Public URL (e.g. an ngrok tunnel to this API) where the SII posts results.
+    # Public URL of this API where the SII posts results.
     # The shared token authenticates the webhook, which has no user session.
     def callback_url
       # RENDER_EXTERNAL_URL is the service's public URL when deployed on Render.

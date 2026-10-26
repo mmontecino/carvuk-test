@@ -118,15 +118,8 @@ docker compose exec backend bin/rails db:seed
 
 El frontend llama a `/api/...` con URLs relativas; el servidor de Vite las reenvía al backend (sin CORS).
 
-**Webhook del SII en local:** Pipedream necesita una URL pública. Expón el backend con ngrok y configúrala:
-
-```bash
-ngrok http 3000      # copia https://xxxx.ngrok-free.app
-```
-
-En `backend/.env`: `SII_CALLBACK_URL=https://xxxx.ngrok-free.app` (sin `/webhooks/sii`) y
-`SII_WEBHOOK_TOKEN=<secreto>`; luego `docker compose restart backend`. Sin `SII_CALLBACK_URL`, la app funciona pero
-las boletas quedan en *pending*.
+**Webhook del SII en local:** el SII solo puede llamar a una URL pública, así que en local las boletas se crean
+con normalidad pero quedan en *pending*. El flujo completo con el SII se prueba en la demo desplegada.
 
 ## Tests y calidad
 

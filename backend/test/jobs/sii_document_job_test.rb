@@ -2,7 +2,7 @@ require "test_helper"
 
 class SiiDocumentJobTest < ActiveJob::TestCase
   setup do
-    ENV["SII_CALLBACK_URL"] = "https://abc.ngrok-free.app/"
+    ENV["SII_CALLBACK_URL"] = "https://api.example.com/"
     ENV["SII_WEBHOOK_TOKEN"] = "secret"
     @requests = []
     requests = @requests
@@ -19,7 +19,7 @@ class SiiDocumentJobTest < ActiveJob::TestCase
   test "requests the document with the receipt id and the webhook url" do
     SiiDocumentJob.perform_now(receipts(:one).id)
 
-    assert_equal [ { document_id: receipts(:one).id, callback_url: "https://abc.ngrok-free.app/webhooks/sii?token=secret" } ], @requests
+    assert_equal [ { document_id: receipts(:one).id, callback_url: "https://api.example.com/webhooks/sii?token=secret" } ], @requests
   end
 
   test "skips receipts that already have a result" do
