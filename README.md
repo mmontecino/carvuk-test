@@ -8,7 +8,7 @@ Para el flujo de documentos SII (webhook) **usamos el proyecto deployado**, no u
 
 | Servicio | Plataforma | URL |
 |---|---|---|
-| Frontend (React/Vite) | Cloudflare Pages | `https://<proyecto>.pages.dev` |
+| Frontend (React/Vite) | Cloudflare Pages | https://carvuk-test.pages.dev |
 | Backend (Rails API) | Render | https://carvuk-api-ll1h.onrender.com |
 | Base de datos | Supabase (Postgres) | — |
 
