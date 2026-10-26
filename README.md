@@ -50,8 +50,11 @@ Al crear una boleta, el backend le pide al servicio externo (Pipedream, simula e
 con un `POST` a `https://eol9cyu9z953tcx.m.pipedream.net/document-sii`:
 
 ```json
-{ "callbackUrl": "https://<url-publica>/webhooks/sii?token=...", "documentId": 1234 }
+{ "callbackUrl": "https://<url-publica>/webhooks/sii?token=...", "documentId": <id de la boleta> }
 ```
+
+`documentId` es el id de la boleta en nuestra base (no un valor fijo): el webhook lo usa para saber a qué boleta
+corresponde el resultado.
 
 El SII responde después, de forma asíncrona, con un `POST` a esa `callbackUrl`
 (`{ documentId, status, siiCode, pdfUrl }`). El resultado se guarda en la boleta y el historial
