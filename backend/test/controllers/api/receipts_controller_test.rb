@@ -21,6 +21,22 @@ class Api::ReceiptsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ receipts(:one).id ], response.parsed_body.map { |r| r["id"] }
   end
 
+  test "includes the SII document fields" do
+    receipts(:one).update!(sii_status: "issued", sii_code: "SII-1", pdf_url: "https://example.com/1.pdf")
+
+    get "/api/receipts/#{receipts(:one).id}", headers: @headers
+
+    body = response.parsed_body
+    assert_equal [ "issued", "SII-1", "https://example.com/1.pdf" ], body.values_at("sii_status", "sii_code", "pdf_url")
+  end
+
+  test "new receipts start pending" do
+    post "/api/receipts", params: { receipt: { items: [ { product_id: products(:one).id, amount: 1 } ] } }, headers: @headers, as: :json
+
+    assert_equal "pending", response.parsed_body["sii_status"]
+    assert_nil response.parsed_body["sii_code"]
+  end
+
   test "shows a receipt with its items" do
     get "/api/receipts/#{receipts(:one).id}", headers: @headers
 

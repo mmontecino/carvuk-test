@@ -73,4 +73,6 @@ Rails.application.configure do
 
   # Allow requests proxied by the Vite dev server inside docker compose.
   config.hosts << "backend"
+  # The SII webhook arrives through a public tunnel (e.g. ngrok) with its own Host.
+  config.hosts << URI(ENV["SII_CALLBACK_URL"]).host if ENV["SII_CALLBACK_URL"].present?
 end

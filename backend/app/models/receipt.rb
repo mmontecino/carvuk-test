@@ -4,9 +4,15 @@ class Receipt < ApplicationRecord
   has_many :receipt_products, dependent: :destroy, validate: false
   has_many :products, through: :receipt_products
 
+  SII_STATUSES = %w[pending issued rejected failed].freeze
+
+  validates :sii_status, inclusion: { in: SII_STATUSES }
+  validates :pdf_url, format: { with: %r{\Ahttps?://}i }, allow_blank: true
   validates :taxes, :net_value, :total_value, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :receipt_products, presence: true
   validate :items_are_valid
+
+  after_create_commit { SiiDocumentJob.perform_later(id) }
 
   # Builds an unsaved receipt from [{ product_id:, amount: }, ...], pricing it
   # from the current product prices and the configured tax rate.

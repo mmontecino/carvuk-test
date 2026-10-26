@@ -27,7 +27,7 @@ class Api::ReceiptsController < ApplicationController
     end
 
     def receipt_json(receipt)
-      receipt.as_json(only: %i[id net_value taxes total_value created_at]).merge(
+      receipt.as_json(only: %i[id net_value taxes total_value created_at sii_status sii_code pdf_url]).merge(
         "items" => receipt.receipt_products.map do |item|
           {
             product_id: item.product_id,
