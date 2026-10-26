@@ -22,6 +22,18 @@ class SiiDocumentJobTest < ActiveJob::TestCase
     assert_equal [ { document_id: receipts(:one).id, callback_url: "https://api.example.com/webhooks/sii?token=secret" } ], @requests
   end
 
+  test "leaves the receipt pending when there is no public url" do
+    ENV.delete("SII_CALLBACK_URL")
+    ENV.delete("RENDER_EXTERNAL_URL")
+
+    assert_no_enqueued_jobs only: SiiDocumentJob do
+      SiiDocumentJob.perform_now(receipts(:one).id)
+    end
+
+    assert_empty @requests
+    assert_equal "pending", receipts(:one).reload.sii_status
+  end
+
   test "skips receipts that already have a result" do
     receipts(:one).update!(sii_status: "issued")
 

@@ -17,14 +17,24 @@ module Sii
       raise RequestFailed, "SII responded #{response.code}" unless response.is_a?(Net::HTTPSuccess)
     end
 
+    # Whether this API knows a public URL the SII could call back. It does not
+    # when running locally without SII_CALLBACK_URL.
+    def public_url_configured?
+      public_url.present?
+    end
+
     # Public URL of this API where the SII posts results.
     # The shared token authenticates the webhook, which has no user session.
     def callback_url
-      # RENDER_EXTERNAL_URL is the service's public URL when deployed on Render.
-      base = ENV["SII_CALLBACK_URL"].presence || ENV["RENDER_EXTERNAL_URL"].presence ||
-        raise(RequestFailed, "SII_CALLBACK_URL is not set")
+      base = public_url || raise(RequestFailed, "SII_CALLBACK_URL is not set")
       token = ENV.fetch("SII_WEBHOOK_TOKEN") { raise RequestFailed, "SII_WEBHOOK_TOKEN is not set" }
       "#{base.chomp("/")}/webhooks/sii?#{{ token: token }.to_query}"
     end
+
+    private
+      # RENDER_EXTERNAL_URL is the service's public URL when deployed on Render.
+      def public_url
+        ENV["SII_CALLBACK_URL"].presence || ENV["RENDER_EXTERNAL_URL"].presence
+      end
   end
 end

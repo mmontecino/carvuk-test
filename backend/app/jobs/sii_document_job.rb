@@ -12,6 +12,13 @@ class SiiDocumentJob < ApplicationJob
     receipt = Receipt.find(receipt_id)
     return unless receipt.sii_status == "pending"
 
+    # Without a public URL (local development) the SII cannot call back, so the
+    # receipt stays pending instead of burning retries.
+    unless Sii.public_url_configured?
+      logger.warn "SII_CALLBACK_URL is not set; receipt #{receipt.id} stays pending"
+      return
+    end
+
     Sii.request_document(document_id: receipt.id, callback_url: Sii.callback_url)
   end
 end
