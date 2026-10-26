@@ -6,12 +6,17 @@ export type ReceiptItem = {
   subtotal: string
 }
 
+export type SiiStatus = 'pending' | 'issued' | 'rejected' | 'failed'
+
 export type Receipt = {
   id: number
   net_value: string
   taxes: string
   total_value: string
   created_at: string
+  sii_status: SiiStatus
+  sii_code: string | null
+  pdf_url: string | null
   items: ReceiptItem[]
 }
 

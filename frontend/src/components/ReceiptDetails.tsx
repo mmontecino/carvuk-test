@@ -1,6 +1,13 @@
 import type { Receipt } from '../api/receipts'
 import { formatPrice } from '../utils/formatPrice'
 
+const siiStatusLabels: Record<Receipt['sii_status'], string> = {
+  pending: 'Generando…',
+  issued: '—',
+  rejected: 'Rechazado por el SII',
+  failed: 'No se pudo generar',
+}
+
 export function ReceiptDetails({ receipt }: { receipt: Receipt }) {
   return (
     <table className="cart-table">
@@ -23,6 +30,22 @@ export function ReceiptDetails({ receipt }: { receipt: Receipt }) {
         ))}
       </tbody>
       <tfoot>
+        <tr>
+          <th colSpan={3}>Número SII</th>
+          <td className="numeric">{receipt.sii_code ?? siiStatusLabels[receipt.sii_status]}</td>
+        </tr>
+        <tr>
+          <th colSpan={3}>Documento PDF</th>
+          <td className="numeric">
+            {receipt.pdf_url ? (
+              <a href={receipt.pdf_url} target="_blank" rel="noopener noreferrer">
+                Ver PDF
+              </a>
+            ) : (
+              siiStatusLabels[receipt.sii_status]
+            )}
+          </td>
+        </tr>
         <tr>
           <th colSpan={3}>Neto</th>
           <td className="numeric">{formatPrice(receipt.net_value)}</td>

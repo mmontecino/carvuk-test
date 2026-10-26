@@ -402,3 +402,7 @@
   font-weight: 700;
   color: var(--accent);
 }
+
+.receipt-sii {
+  font-size: 0.875rem;
+}

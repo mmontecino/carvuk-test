@@ -10,25 +10,38 @@ const dateFormatter = new Intl.DateTimeFormat('es-CL', {
   timeStyle: 'short',
 })
 
+const POLL_INTERVAL_MS = 3000
+
 export function ReceiptsPage() {
   const { session, getToken, logout } = useAuth()
   const signedIn = session !== null
   const [receipts, setReceipts] = useState<Receipt[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  const hasPending = receipts?.some((receipt) => receipt.sii_status === 'pending') ?? false
+
+  // Loads the receipts, and keeps refreshing them while the SII is still
+  // issuing a document (its result arrives asynchronously through a webhook).
   useEffect(() => {
     if (!signedIn) return
     const controller = new AbortController()
-    fetchReceipts(getToken, controller.signal)
-      .then(setReceipts)
-      .catch((err: unknown) => {
-        if (controller.signal.aborted) return
-        // Expired or revoked token: sign out, which redirects to the login page.
-        if (err instanceof ApiError && err.status === 401) return logout()
-        setError(err instanceof Error ? err.message : 'Error desconocido')
-      })
-    return () => controller.abort()
-  }, [signedIn, getToken, logout])
+    const load = () =>
+      fetchReceipts(getToken, controller.signal)
+        .then(setReceipts)
+        .catch((err: unknown) => {
+          if (controller.signal.aborted) return
+          // Expired or revoked token: sign out, which redirects to the login page.
+          if (err instanceof ApiError && err.status === 401) return logout()
+          setError(err instanceof Error ? err.message : 'Error desconocido')
+        })
+
+    load()
+    const interval = hasPending ? setInterval(load, POLL_INTERVAL_MS) : undefined
+    return () => {
+      controller.abort()
+      clearInterval(interval)
+    }
+  }, [signedIn, getToken, logout, hasPending])
 
   if (!session) return <Navigate to="/login" replace />
 
@@ -57,6 +70,7 @@ export function ReceiptsPage() {
                     {dateFormatter.format(new Date(receipt.created_at))}
                   </span>
                   <span className="receipt-total">{formatPrice(receipt.total_value)}</span>
+                  <span className="receipt-sii">{receipt.sii_code ?? 'SII pendiente'}</span>
                 </summary>
                 <ReceiptDetails receipt={receipt} />
               </details>
