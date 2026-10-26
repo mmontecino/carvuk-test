@@ -1,0 +1,28 @@
+# Render Blueprint for the Rails API. The frontend is deployed separately.
+services:
+  - type: web
+    name: carvuk-api
+    runtime: docker
+    plan: free
+    # Same region as the Supabase pooler (aws us-east-2) to keep database latency low.
+    region: ohio
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /up
+    envVars:
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: SII_WEBHOOK_TOKEN
+        generateValue: true
+      - key: TAX_RATE
+        value: "0.15"
+      # Postgres connection string (Supabase: use the session pooler, port 5432).
+      - key: DATABASE_URL
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      # Public URL(s) of the frontend, comma separated (CORS and Clerk "azp" check).
+      - key: FRONTEND_ORIGIN
+        sync: false
