@@ -110,10 +110,17 @@ function PurchaseConfirmation({ receipt }: { receipt: Receipt }) {
     <div className="cart-summary">
       <h1>¡Compra realizada!</h1>
       <p>Boleta N° {receipt.id}</p>
+      <p className="confirmation-note">
+        Estamos generando tu documento en el SII. Cuando esté listo verás su número y el PDF en{' '}
+        <Link to="/receipts">Mis boletas</Link>.
+      </p>
       <ReceiptDetails receipt={receipt} />
       <div className="cart-actions">
-        <Link to="/" className="button">
+        <Link to="/" className="button button-secondary">
           Seguir comprando
+        </Link>
+        <Link to="/receipts" className="button">
+          Ver mis boletas
         </Link>
       </div>
     </div>

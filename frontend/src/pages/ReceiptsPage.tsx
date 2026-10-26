@@ -47,14 +47,14 @@ export function ReceiptsPage() {
 
   return (
     <>
-      <h1>Mis compras</h1>
+      <h1>Mis boletas</h1>
       {error ? (
         <p className="status error">{error}</p>
       ) : receipts === null ? (
         <p className="status">Cargando boletas…</p>
       ) : receipts.length === 0 ? (
         <div className="cart-empty">
-          <p>Aún no tienes compras.</p>
+          <p>Aún no tienes boletas. Tus compras aparecerán aquí.</p>
           <Link to="/" className="button">
             Ver productos
           </Link>

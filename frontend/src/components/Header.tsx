@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link, NavLink } from 'react-router'
 import { useAuth } from '../auth/useAuth'
 import { CartButton } from './CartButton'
 
@@ -12,9 +12,10 @@ export function Header() {
       </Link>
       {session ? (
         <div className="header-user">
-          <Link to="/receipts" className="user-link" title="Mis compras">
-            Hola, {session.user.name}
-          </Link>
+          <span className="user-name">Hola, {session.user.name}</span>
+          <NavLink to="/receipts" className="nav-link">
+            Mis boletas
+          </NavLink>
           <CartButton />
           <button type="button" className="button button-secondary" onClick={logout}>
             Cerrar sesión
