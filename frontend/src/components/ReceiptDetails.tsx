@@ -31,22 +31,6 @@ export function ReceiptDetails({ receipt }: { receipt: Receipt }) {
       </tbody>
       <tfoot>
         <tr>
-          <th colSpan={3}>Número SII</th>
-          <td className="numeric">{receipt.sii_code ?? siiStatusLabels[receipt.sii_status]}</td>
-        </tr>
-        <tr>
-          <th colSpan={3}>Documento PDF</th>
-          <td className="numeric">
-            {receipt.pdf_url ? (
-              <a href={receipt.pdf_url} target="_blank" rel="noopener noreferrer">
-                Ver PDF
-              </a>
-            ) : (
-              siiStatusLabels[receipt.sii_status]
-            )}
-          </td>
-        </tr>
-        <tr>
           <th colSpan={3}>Neto</th>
           <td className="numeric">{formatPrice(receipt.net_value)}</td>
         </tr>
@@ -57,6 +41,22 @@ export function ReceiptDetails({ receipt }: { receipt: Receipt }) {
         <tr>
           <th colSpan={3}>Total</th>
           <td className="numeric total">{formatPrice(receipt.total_value)}</td>
+        </tr>
+        <tr>
+          <th colSpan={3}>Número SII</th>
+          <td className="numeric">{receipt.sii_code ?? siiStatusLabels[receipt.sii_status]}</td>
+        </tr>
+        <tr>
+          <th colSpan={3}>Boleta</th>
+          <td className="numeric">
+            {receipt.pdf_url ? (
+              <a href={receipt.pdf_url} target="_blank" rel="noopener noreferrer">
+                Descargar boleta
+              </a>
+            ) : (
+              siiStatusLabels[receipt.sii_status]
+            )}
+          </td>
         </tr>
       </tfoot>
     </table>
