@@ -13,6 +13,11 @@ mediante un **webhook**; el historial de boletas muestra el **número SII** y el
 | Frontend | Cloudflare Pages | https://carvuk-test.pages.dev |
 | Backend (API) | Render | https://carvuk-api-ll1h.onrender.com |
 | Base de datos | Supabase (Postgres) | — |
+| Autenticación | Clerk (instancia de desarrollo) | — |
+
+**Todos los servicios usan su capa gratuita** (Cloudflare Pages, Render, Supabase y Clerk; el SII es el simulador
+gratuito de Pipedream). Es suficiente para esta prueba, pero implica limitaciones propias de ese tipo de planes; ver
+las notas más abajo.
 
 **Cómo probarlo**
 
@@ -21,9 +26,13 @@ mediante un **webhook**; el historial de boletas muestra el **número SII** y el
 3. Abre **Mis boletas**: la boleta aparece como *Generando…* y, en unos segundos, se completa sola con el
    **Número SII** y el enlace **Descargar boleta** (la página se actualiza cada 1 s mientras hay documentos pendientes).
 
-> **Notas sobre la demo**
-> - El backend corre en el plan gratis de Render: tras ~15 min sin uso se duerme y la primera petición puede tardar
->   cerca de un minuto.
+> **Notas sobre la demo (capa gratuita)**
+> - **Render (plan gratis):** el backend se duerme tras ~15 min sin uso y la primera petición puede tardar cerca de
+>   un minuto en responder. Si abres la demo y no carga, espera y recarga.
+> - **Supabase (plan gratis):** los proyectos sin actividad durante una semana se pausan; si ocurriera, la API
+>   devolverá errores hasta reactivar el proyecto desde su dashboard.
+> - **Clerk:** se usa una instancia de *desarrollo* (claves `pk_test_…`), pensada para pruebas y no para producción.
+> - **Cloudflare Pages:** el plan gratis no tiene limitaciones relevantes para esta demo.
 > - El número SII es siempre `SII-123456`: lo devuelve así el simulador de Pipedream (el backend guarda tal cual lo
 >   que recibe en el webhook). Lo que cambia por boleta es el `documentId`.
 
@@ -222,4 +231,6 @@ directo a Render.
 - **`documentId` secuencial:** es el id de la boleta; un UUID propio lo haría menos predecible.
 - **Sin tests de frontend** ni pipeline de CI activo (el workflow generado por Rails está en `backend/.github`, que
   GitHub no ejecuta; debería vivir en `.github/` en la raíz).
-- **Plan gratis de Render:** arranque en frío de ~1 minuto.
+- **Capa gratuita en todos los servicios:** arranque en frío de ~1 minuto en Render, pausa de Supabase tras una
+  semana sin actividad, y Clerk en modo desarrollo. Para producción habría que pasar a planes de pago o equivalentes,
+  una instancia de producción de Clerk (`clerk deploy`) y una cola de jobs persistente.
