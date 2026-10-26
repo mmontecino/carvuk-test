@@ -11,15 +11,15 @@ const dateFormatter = new Intl.DateTimeFormat('es-CL', {
 })
 
 export function ReceiptsPage() {
-  const { session, logout } = useAuth()
-  const token = session?.token
+  const { session, getToken, logout } = useAuth()
+  const signedIn = session !== null
   const [receipts, setReceipts] = useState<Receipt[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!token) return
+    if (!signedIn) return
     const controller = new AbortController()
-    fetchReceipts(token, controller.signal)
+    fetchReceipts(getToken, controller.signal)
       .then(setReceipts)
       .catch((err: unknown) => {
         if (controller.signal.aborted) return
@@ -28,7 +28,7 @@ export function ReceiptsPage() {
         setError(err instanceof Error ? err.message : 'Error desconocido')
       })
     return () => controller.abort()
-  }, [token, logout])
+  }, [signedIn, getToken, logout])
 
   if (!session) return <Navigate to="/login" replace />
 

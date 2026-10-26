@@ -29,7 +29,8 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(token: string, init: RequestInit = {}, signal?: AbortSignal): Promise<T> {
+async function request<T>(getToken: () => Promise<string>, init: RequestInit = {}, signal?: AbortSignal): Promise<T> {
+  const token = await getToken()
   const response = await fetch('/api/receipts', {
     ...init,
     signal,
@@ -48,12 +49,12 @@ async function request<T>(token: string, init: RequestInit = {}, signal?: AbortS
   return data
 }
 
-export function fetchReceipts(token: string, signal?: AbortSignal) {
-  return request<Receipt[]>(token, {}, signal)
+export function fetchReceipts(getToken: () => Promise<string>, signal?: AbortSignal) {
+  return request<Receipt[]>(getToken, {}, signal)
 }
 
-export function createReceipt(token: string, items: ReceiptItemInput[]) {
-  return request<Receipt>(token, {
+export function createReceipt(getToken: () => Promise<string>, items: ReceiptItemInput[]) {
+  return request<Receipt>(getToken, {
     method: 'POST',
     body: JSON.stringify({ receipt: { items } }),
   })

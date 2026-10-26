@@ -7,7 +7,7 @@ import { ReceiptDetails } from '../components/ReceiptDetails'
 import { formatPrice } from '../utils/formatPrice'
 
 export function CartPage() {
-  const { session, logout } = useAuth()
+  const { session, getToken, logout } = useAuth()
   const { items, totalPrice, removeItem, clear } = useCart()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -22,7 +22,7 @@ export function CartPage() {
     setError(null)
     try {
       const created = await createReceipt(
-        session.token,
+        getToken,
         items.map((item) => ({ product_id: item.productId, amount: item.quantity })),
       )
       clear()

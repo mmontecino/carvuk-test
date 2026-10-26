@@ -1,10 +1,14 @@
 import { createContext } from 'react'
-import type { Credentials, Registration, Session } from '../api/auth'
+
+export type SessionUser = {
+  id: string
+  name: string
+  email: string
+}
 
 export type AuthContextValue = {
-  session: Session | null
-  login: (credentials: Credentials) => Promise<void>
-  register: (registration: Registration) => Promise<void>
+  session: { user: SessionUser } | null
+  getToken: () => Promise<string>
   logout: () => Promise<void>
 }
 

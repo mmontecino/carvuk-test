@@ -5,9 +5,9 @@ export type CartItem = {
   quantity: number
 }
 
-const keyFor = (userId: number) => `cart:${userId}`
+const keyFor = (userId: string) => `cart:${userId}`
 
-export function loadCart(userId: number | null): CartItem[] {
+export function loadCart(userId: string | null): CartItem[] {
   if (userId === null) return []
   try {
     const raw = localStorage.getItem(keyFor(userId))
@@ -17,7 +17,7 @@ export function loadCart(userId: number | null): CartItem[] {
   }
 }
 
-export function saveCart(userId: number, items: CartItem[]) {
+export function saveCart(userId: string, items: CartItem[]) {
   try {
     if (items.length > 0) localStorage.setItem(keyFor(userId), JSON.stringify(items))
     else localStorage.removeItem(keyFor(userId))
