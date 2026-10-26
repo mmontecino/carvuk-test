@@ -95,31 +95,79 @@ Una boleta incluye `sii_status` (`pending` · `issued` · `rejected` · `failed`
 
 ## Correr en local
 
-Requisitos: Docker y Docker Compose (no hace falta Ruby ni Node en el equipo).
+**Requisitos:** Docker y Docker Compose (no hace falta Ruby, Node ni Postgres instalados) y una cuenta gratuita de
+[Clerk](https://dashboard.clerk.com), que provee la autenticación. Los puertos `3000`, `5173` y `5432` deben estar libres.
+
+**1. Clonar el repositorio**
 
 ```bash
-# 1. Variables de entorno
-cp backend/.env.example backend/.env             # DATABASE_URL local ya viene configurada
+git clone https://github.com/mmontecino/carvuk-test.git
+cd carvuk-test
+```
+
+**2. Crear una aplicación en Clerk** (2 minutos)
+
+En https://dashboard.clerk.com → *Create application* → habilita **Email** como método de acceso → en
+**API keys** copia la *Publishable key* (`pk_test_…`) y la *Secret key* (`sk_test_…`).
+
+**3. Configurar las variables de entorno**
+
+```bash
+cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
-#    Completa las claves de Clerk (gratis: https://dashboard.clerk.com → API keys) en ambos archivos.
+```
 
-# 2. Levantar todo (la primera vez usa --build)
+- En `backend/.env`: pega `CLERK_PUBLISHABLE_KEY` y `CLERK_SECRET_KEY`. El resto de los valores ya sirve en local.
+- En `frontend/.env.local`: pega la misma *Publishable key* en `VITE_CLERK_PUBLISHABLE_KEY`.
+
+**4. Levantar todo**
+
+```bash
 docker compose up --build
+```
 
-# 3. Cargar el catálogo de productos (en otra terminal)
+La primera vez tarda unos minutos (construye las imágenes). El backend crea la base de datos y aplica las
+migraciones solo al iniciar. Espera a ver `Listening on http://0.0.0.0:3000`.
+
+**5. Cargar el catálogo de productos** (en otra terminal, desde la misma carpeta)
+
+```bash
 docker compose exec backend bin/rails db:seed
 ```
+
+**6. Usar la aplicación**
 
 | Servicio | URL |
 |---|---|
 | Frontend | http://localhost:5173 |
-| Backend | http://localhost:3000 |
-| Postgres | localhost:5432 (`postgres`/`postgres`) |
+| Backend | http://localhost:3000 (health check: `/up`) |
+| Postgres | localhost:5432 (`postgres` / `postgres`) |
 
-El frontend llama a `/api/...` con URLs relativas; el servidor de Vite las reenvía al backend (sin CORS).
+Entra a http://localhost:5173, crea una cuenta, agrega productos al carrito y pulsa **Finalizar compra**. Tu boleta
+aparece en **Mis boletas**.
 
-**Webhook del SII en local:** el SII solo puede llamar a una URL pública, así que en local las boletas se crean
-con normalidad pero quedan en *pending*. El flujo completo con el SII se prueba en la demo desplegada.
+**7. Documento del SII en local**
+
+El SII (Pipedream) solo puede llamar a una URL pública, así que en local la boleta se crea con normalidad y queda en
+*Generando…* (`pending`). El flujo real con el SII se ve en la [demo desplegada](#demo). Para completar una boleta
+local, simula la respuesta del SII llamando al webhook (usa el `SII_WEBHOOK_TOKEN` de tu `backend/.env`, por defecto
+`change-me`, y el id de la boleta en `documentId`):
+
+```bash
+curl -X POST "http://localhost:3000/webhooks/sii?token=change-me" \
+  -H "Content-Type: application/json" \
+  -d '{"documentId": 1, "status": "issued", "siiCode": "SII-123456", "pdfUrl": "https://example.com/boleta.pdf"}'
+```
+
+La página de boletas se actualiza sola y muestra el número SII y el enlace de descarga.
+
+**Comandos útiles**
+
+```bash
+docker compose down            # detener
+docker compose down -v         # detener y borrar la base de datos local
+docker compose logs -f backend # ver los logs de la API
+```
 
 ## Tests y calidad
 
