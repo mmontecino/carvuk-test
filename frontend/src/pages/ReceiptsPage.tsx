@@ -10,7 +10,7 @@ const dateFormatter = new Intl.DateTimeFormat('es-CL', {
   timeStyle: 'short',
 })
 
-const POLL_INTERVAL_MS = 3000
+const POLL_INTERVAL_MS = 1000
 
 export function ReceiptsPage() {
   const { session, getToken, logout } = useAuth()

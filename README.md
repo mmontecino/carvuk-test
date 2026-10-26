@@ -19,7 +19,7 @@ mediante un **webhook**; el historial de boletas muestra el **número SII** y el
 1. Entra a https://carvuk-test.pages.dev y crea una cuenta (Clerk) desde **Iniciar sesión → Crear cuenta**.
 2. Agrega productos al carrito y pulsa **Finalizar compra**.
 3. Abre **Mis boletas**: la boleta aparece como *Generando…* y, en unos segundos, se completa sola con el
-   **Número SII** y el enlace **Descargar boleta** (la página se actualiza cada 3 s mientras hay documentos pendientes).
+   **Número SII** y el enlace **Descargar boleta** (la página se actualiza cada 1 s mientras hay documentos pendientes).
 
 > **Notas sobre la demo**
 > - El backend corre en el plan gratis de Render: tras ~15 min sin uso se duerme y la primera petición puede tardar
@@ -58,7 +58,7 @@ Flujo de una compra:
    marca la boleta como `failed`.
 3. El SII responde después a la `callbackUrl` con `{ documentId, status, siiCode, pdfUrl }`.
 4. `POST /webhooks/sii` valida el token, busca la boleta por `documentId` y guarda `sii_status`, `sii_code` y `pdf_url`.
-5. El frontend consulta las boletas cada 3 s mientras alguna siga pendiente.
+5. El frontend consulta las boletas cada 1 s mientras alguna siga pendiente.
 
 ## Decisiones técnicas
 
