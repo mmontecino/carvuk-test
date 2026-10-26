@@ -127,15 +127,10 @@ docker compose up --build
 ```
 
 La primera vez tarda unos minutos (construye las imágenes). El backend crea la base de datos y aplica las
-migraciones solo al iniciar. Espera a ver `Listening on http://0.0.0.0:3000`.
+migraciones y carga el catálogo de 13 productos (`db/seeds.rb`) solo la primera vez. Espera a ver
+`Listening on http://0.0.0.0:3000`.
 
-**5. Cargar el catálogo de productos** (en otra terminal, desde la misma carpeta)
-
-```bash
-docker compose exec backend bin/rails db:seed
-```
-
-**6. Usar la aplicación**
+**5. Usar la aplicación**
 
 | Servicio | URL |
 |---|---|
@@ -146,7 +141,7 @@ docker compose exec backend bin/rails db:seed
 Entra a http://localhost:5173, crea una cuenta, agrega productos al carrito y pulsa **Finalizar compra**. Tu boleta
 aparece en **Mis boletas**.
 
-**7. Documento del SII en local**
+**6. Documento del SII en local**
 
 El SII (Pipedream) solo puede llamar a una URL pública, así que en local la boleta se crea con normalidad y queda en
 *Generando…* (`pending`). El flujo real con el SII se ve en la [demo desplegada](#demo). Para completar una boleta
@@ -172,13 +167,14 @@ docker compose logs -f backend # ver los logs de la API
 ## Tests y calidad
 
 ```bash
-docker compose exec backend bin/rails test       # 70 tests (modelos, controladores, webhook, job, verificación de tokens, cliente SII)
+docker compose exec backend bin/rails db:test:prepare test   # 71 tests (modelos, controladores, webhook, job, tokens, cliente SII)
 docker compose exec backend bin/rubocop          # estilo (rubocop-rails-omakase)
 docker compose exec backend bin/brakeman         # análisis de seguridad
 docker compose exec frontend npm run lint        # oxlint
 docker compose exec frontend npm run build       # type-check (tsc) + build
 ```
 
+`db:test:prepare` crea la base de test la primera vez (los tests usan siempre el Postgres local, nunca `DATABASE_URL`).
 Los tests no llaman a Clerk ni al SII: un token `test-<clerk_id>` autentica a ese usuario y el cliente del SII se
 reemplaza en el test del job. El frontend aún no tiene tests automatizados.
 
