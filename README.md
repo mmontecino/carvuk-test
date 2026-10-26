@@ -124,7 +124,7 @@ con normalidad pero quedan en *pending*. El flujo completo con el SII se prueba 
 ## Tests y calidad
 
 ```bash
-docker compose exec backend bin/rails test       # 46 tests (modelos, controladores, webhook, job, auth)
+docker compose exec backend bin/rails test       # 70 tests (modelos, controladores, webhook, job, verificación de tokens, cliente SII)
 docker compose exec backend bin/rubocop          # estilo (rubocop-rails-omakase)
 docker compose exec backend bin/brakeman         # análisis de seguridad
 docker compose exec frontend npm run lint        # oxlint
