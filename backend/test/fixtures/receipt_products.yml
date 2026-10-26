@@ -1,0 +1,11 @@
+one:
+  receipt: one
+  product: one
+  amount: 1
+  unit_price: 4990
+
+two:
+  receipt: two
+  product: two
+  amount: 1
+  unit_price: 12990.50

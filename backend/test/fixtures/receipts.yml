@@ -1,0 +1,11 @@
+one:
+  user: one
+  net_value: 4339.13
+  taxes: 650.87
+  total_value: 4990
+
+two:
+  user: two
+  net_value: 11296.09
+  taxes: 1694.41
+  total_value: 12990.50

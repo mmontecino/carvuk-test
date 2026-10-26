@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Generates the Rails API app inside ./backend using a throwaway Ruby container,
+# so Ruby/Rails don't need to be installed on the host.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+RUBY_IMAGE="ruby:3.4"
+
+if [ -f "$ROOT/backend/Gemfile" ]; then
+  echo "backend/Gemfile already exists, skipping rails new"
+  exit 0
+fi
+
+docker run --rm \
+  -v "$ROOT/backend:/app" \
+  -w /app \
+  -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
+  "$RUBY_IMAGE" bash -c '
+    set -e
+    gem install rails --no-document
+    rails new . --api --database=postgresql --skip-git --skip-kamal --skip-thruster --force
+    bundle add rack-cors
+    chown -R "$HOST_UID:$HOST_GID" /app
+  '
+
+cat > "$ROOT/backend/config/initializers/cors.rb" <<'RUBY'
+# Allow the Vite dev server to call the API directly (the Vite proxy also covers /api).
+Rails.application.config.middleware.insert_before 0, Rack::Cors do
+  allow do
+    origins ENV.fetch("FRONTEND_ORIGIN", "http://localhost:5173")
+
+    resource "*",
+      headers: :any,
+      methods: [:get, :post, :put, :patch, :delete, :options, :head]
+  end
+end
+RUBY
+
+echo "Rails app generated in backend/. Next: docker compose up --build"
