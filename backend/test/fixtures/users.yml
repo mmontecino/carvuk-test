@@ -1,9 +1,9 @@
 one:
   name: Ana
   email: ana@example.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  clerk_id: user_ana
 
 two:
   name: Bruno
   email: bruno@example.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  clerk_id: user_bruno

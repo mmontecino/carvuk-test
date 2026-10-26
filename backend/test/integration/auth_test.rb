@@ -1,36 +1,26 @@
 require "test_helper"
 
 class AuthTest < ActionDispatch::IntegrationTest
-  test "sign up returns the user and a token" do
-    post "/api/users", params: { user: { name: "Carla", email: "carla@example.com", password: "password123" } }, as: :json
+  test "accepts a valid Clerk token" do
+    get "/api/receipts", headers: auth_headers(users(:one))
 
-    assert_response :created
-    assert_equal "Carla", response.parsed_body.dig("user", "name")
-    assert_match(/\ABearer /, response.headers["Authorization"])
-  end
-
-  test "sign up with invalid data returns errors" do
-    post "/api/users", params: { user: { name: "", email: "bad", password: "1" } }, as: :json
-
-    assert_response :unprocessable_content
-    assert_not_empty response.parsed_body["errors"]
-  end
-
-  test "sign in returns a token and sign out revokes it" do
-    post "/api/users/sign_in", params: { user: { email: users(:one).email, password: "password123" } }, as: :json
     assert_response :ok
-    token = response.headers["Authorization"]
-    assert_match(/\ABearer /, token)
+  end
 
-    delete "/api/users/sign_out", headers: { "Authorization" => token }
-    assert_response :no_content
+  test "rejects a missing token" do
+    get "/api/receipts"
 
-    get "/api/receipts", headers: { "Authorization" => token }
     assert_response :unauthorized
   end
 
-  test "sign in with a wrong password is rejected" do
-    post "/api/users/sign_in", params: { user: { email: users(:one).email, password: "nope" } }, as: :json
+  test "rejects an invalid token" do
+    get "/api/receipts", headers: { "Authorization" => "Bearer garbage" }
+
+    assert_response :unauthorized
+  end
+
+  test "rejects a malformed authorization header" do
+    get "/api/receipts", headers: { "Authorization" => "Basic abc" }
 
     assert_response :unauthorized
   end

@@ -1,6 +1,4 @@
 class ApplicationController < ActionController::API
-  before_action :configure_permitted_parameters, if: :devise_controller?
-
   rescue_from ActiveRecord::RecordNotFound do
     render json: { error: "Not found" }, status: :not_found
   end
@@ -9,12 +7,13 @@ class ApplicationController < ActionController::API
     render json: { error: e.message }, status: :bad_request
   end
 
-  private
-    def configure_permitted_parameters
-      devise_parameter_sanitizer.permit(:sign_up, keys: [ :name ])
-    end
+  attr_reader :current_user
 
-    def user_json(user)
-      user.slice(:id, :name, :email)
+  private
+    def authenticate_user!
+      token = request.authorization.to_s[/\ABearer (.+)\z/, 1]
+      @current_user = User.from_clerk(Clerk.verify(token)["sub"])
+    rescue Clerk::InvalidToken
+      render json: { error: "Unauthorized" }, status: :unauthorized
     end
 end

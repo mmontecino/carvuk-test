@@ -1,10 +1,9 @@
 require "test_helper"
-require "devise/jwt/test_helpers"
 
 class Api::ReceiptsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
-    @headers = Devise::JWT::TestHelpers.auth_headers({}, @user)
+    @headers = auth_headers(@user)
   end
 
   test "requires authentication" do
