@@ -73,15 +73,10 @@ Flujo de una compra:
 
 - **Clerk con verificación propia del JWT.** El frontend envía el token de sesión como `Authorization: Bearer`; el
   backend lo verifica (RS256) contra las claves públicas (JWKS) de la instancia, validando emisor y origen
-  autorizado (`azp`). No hay sesiones ni contraseñas en la API. Se reemplazó Devise/devise-jwt.
-- **Usuario local enlazado a Clerk.** Las boletas necesitan un `user_id`, así que la primera vez que llega un
-  usuario se crea (o se enlaza por email, si ya existía) una fila en `users` con su `clerk_id`.
+  autorizado (`azp`). No hay sesiones ni contraseñas en la API. Se reemplazó Devise/devise-jwt de la primera entrega.
 - **Precios y totales siempre en el servidor.** Los precios incluyen IVA (`TAX_RATE`, por defecto 15 %):
   `neto = total / (1 + tasa)` y `IVA = total − neto`. Cada ítem guarda el `unit_price` pagado, así que cambiar el
   precio de un producto después no altera boletas antiguas.
-- **Integridad en la base de datos**, además de las validaciones del modelo: restricciones `CHECK`
-  (precios y cantidades positivos, totales no negativos), claves foráneas e índice único
-  `(receipt_id, product_id)`.
 - **Webhook protegido por token.** El SII no firma sus llamadas y el webhook no tiene sesión de usuario, así que la
   `callbackUrl` lleva un token secreto compartido; sin él, la respuesta es `401`. Solo se aceptan estados
   conocidos y enlaces PDF `http(s)`.
@@ -226,11 +221,7 @@ directo a Render.
   SII se puede perder y la boleta queda en *pending*. Mejora: Solid Queue u otra cola persistente, y un botón/tarea
   para reenviar.
 - **Webhook sin firma del emisor:** se protege con un token en la URL; con un SII real convendría validar una firma.
-- **Datos de usuario copiados una vez:** nombre y email se copian desde Clerk al crear el usuario local y no se
-  actualizan solos (faltaría un webhook de Clerk).
 - **`documentId` secuencial:** es el id de la boleta; un UUID propio lo haría menos predecible.
-- **Sin tests de frontend** ni pipeline de CI activo (el workflow generado por Rails está en `backend/.github`, que
-  GitHub no ejecuta; debería vivir en `.github/` en la raíz).
 - **Capa gratuita en todos los servicios:** arranque en frío de ~1 minuto en Render, pausa de Supabase tras una
   semana sin actividad, y Clerk en modo desarrollo. Para producción habría que pasar a planes de pago o equivalentes,
   una instancia de producción de Clerk (`clerk deploy`) y una cola de jobs persistente.
