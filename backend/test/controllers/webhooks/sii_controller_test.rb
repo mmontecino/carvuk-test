@@ -19,6 +19,38 @@ class Webhooks::SiiControllerTest < ActionDispatch::IntegrationTest
     assert_equal "https://example.com/doc.pdf", @receipt.pdf_url
   end
 
+  test "handles the same result being delivered twice" do
+    2.times do
+      post "/webhooks/sii?token=secret", params: @payload, as: :json
+      assert_response :no_content
+    end
+
+    @receipt.reload
+    assert_equal [ "issued", "SII-123456", "https://example.com/doc.pdf" ], [ @receipt.sii_status, @receipt.sii_code, @receipt.pdf_url ]
+  end
+
+  test "stores rejected and failed results that carry no code or pdf" do
+    %w[rejected failed].each do |status|
+      post "/webhooks/sii?token=secret", params: { documentId: @receipt.id, status: status }, as: :json
+
+      assert_response :no_content
+      @receipt.reload
+      assert_equal status, @receipt.sii_status
+      assert_nil @receipt.sii_code
+      assert_nil @receipt.pdf_url
+    end
+  end
+
+  test "keeps the stored code and pdf when a later result does not include them" do
+    @receipt.update!(sii_status: "issued", sii_code: "SII-1", pdf_url: "https://example.com/1.pdf")
+
+    post "/webhooks/sii?token=secret", params: { documentId: @receipt.id, status: "issued" }, as: :json
+
+    assert_response :no_content
+    @receipt.reload
+    assert_equal [ "SII-1", "https://example.com/1.pdf" ], [ @receipt.sii_code, @receipt.pdf_url ]
+  end
+
   test "rejects a missing or wrong token" do
     post "/webhooks/sii", params: @payload, as: :json
     assert_response :unauthorized
