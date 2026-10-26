@@ -48,6 +48,9 @@ class Webhooks::SiiControllerTest < ActionDispatch::IntegrationTest
 
     post "/webhooks/sii?token=secret", params: @payload.merge(pdfUrl: "javascript:alert(1)"), as: :json
     assert_response :unprocessable_content
+
+    post "/webhooks/sii?token=secret", params: @payload.merge(pdfUrl: "https://example.com/a.pdf\njavascript:alert(1)"), as: :json
+    assert_response :unprocessable_content
     assert_equal "pending", @receipt.reload.sii_status
   end
 

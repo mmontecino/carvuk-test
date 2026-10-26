@@ -7,7 +7,7 @@ class Receipt < ApplicationRecord
   SII_STATUSES = %w[pending issued rejected failed].freeze
 
   validates :sii_status, inclusion: { in: SII_STATUSES }
-  validates :pdf_url, format: { with: %r{\Ahttps?://}i }, allow_blank: true
+  validates :pdf_url, format: { with: %r{\Ahttps?://\S+\z}i }, allow_blank: true
   validates :taxes, :net_value, :total_value, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :receipt_products, presence: true
   validate :items_are_valid
