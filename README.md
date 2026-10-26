@@ -2,6 +2,22 @@
 
 Rails (API) + React/Vite, todo en Docker.
 
+## Proyecto deployado
+
+Para el flujo de documentos SII (webhook) **usamos el proyecto deployado**, no un túnel local:
+
+| Servicio | Plataforma | URL |
+|---|---|---|
+| Frontend (React/Vite) | Cloudflare Pages | `https://<proyecto>.pages.dev` |
+| Backend (Rails API) | Render | `https://<servicio>.onrender.com` |
+| Base de datos | Supabase (Postgres) | — |
+
+El webhook del SII llega directo al backend en Render (`https://<servicio>.onrender.com/webhooks/sii`), por lo que
+no se necesita ngrok. Ver [Deploy del backend](#deploy-del-backend-en-render) y
+[Deploy del frontend](#deploy-del-frontend-en-cloudflare-pages). El desarrollo local (abajo) sigue disponible.
+
+## Desarrollo local
+
 | Servicio   | URL                      |
 |------------|--------------------------|
 | frontend   | http://localhost:5173    |
@@ -41,17 +57,18 @@ El SII responde después, de forma asíncrona, con un `POST` a esa `callbackUrl`
 (`{ documentId, status, siiCode, pdfUrl }`). El resultado se guarda en la boleta y el historial
 ("Mis compras") muestra el **Número SII** y el **Link PDF**; mientras está pendiente se actualiza solo.
 
-Para que el SII pueda llamar al webhook, `callbackUrl` debe ser una URL pública. Hay dos opciones:
+Para que el SII pueda llamar al webhook, `callbackUrl` debe ser una URL pública.
 
-**1. Proyecto deployado:** usa la URL pública del backend.
+**Con el proyecto deployado (opción que usamos):** el backend en Render arma el `callbackUrl` solo con su URL
+pública (`RENDER_EXTERNAL_URL`) y `SII_WEBHOOK_TOKEN` lo genera el Blueprint. No hay que configurar nada más.
 
-**2. Local con ngrok:** expón el puerto 3000 del backend.
+**Alternativa, solo para correr el proyecto en local con ngrok:** expón el puerto 3000 del backend.
 
 ```bash
 ngrok http 3000     # copia la URL https://xxxx.ngrok-free.app
 ```
 
-En ambos casos define estas variables en `backend/.env` y reinicia el backend (`docker compose restart backend`):
+y define estas variables en `backend/.env`, luego reinicia el backend (`docker compose restart backend`):
 
 ```
 SII_CALLBACK_URL=https://xxxx.ngrok-free.app   # URL pública, sin /webhooks/sii
